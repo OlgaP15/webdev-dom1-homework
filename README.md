@@ -1,6 +1,6 @@
 # Проект "Комментарии"
 
-https://glebkaf.github.io/webdev-dom-homework/
+https://olgap15.github.io/webdev-dom1-homework/
 
 Верстка для учебного проекта студентов Skypro
 
