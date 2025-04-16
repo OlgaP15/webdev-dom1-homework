@@ -66,58 +66,85 @@
   <script>
     "use strict";
     const nameEl = document.querySelector('.add-form-name');
-    const textEl = document.querySelector('.add-form-text');
-    const buttonEl = document.querySelector('.add-form-button');
-    const commentsList = document.querySelector('.comments');
+      const textEl = document.querySelector('.add-form-text');
+      const buttonEl = document.querySelector('.add-form-button');
+      const commentsList = document.querySelector('.comments');
 
-    // Функция для форматирования даты
-    function formatDate() {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = String(now.getFullYear()).slice(-2);
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      
-      return `${day}.${month}.${year} ${hours}:${minutes}`;
-    }
+      // Счётчики кликов
+      let nameClicks = 0;
+      let textClicks = 0;
+      let buttonClicks = 0;
 
-    // Обработчик клика по кнопке
-    buttonEl.addEventListener('click', () => {
-      // Проверяем, что поля заполнены
-      if (nameEl.value.trim() === '' || textEl.value.trim() === '') {
-        alert('Пожалуйста, заполните все поля');
-        return;
+      // Форматирование даты
+      function formatDate() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = String(now.getFullYear()).slice(-2);
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${day}.${month}.${year} ${hours}:${minutes}`;
       }
 
-      // Создаем HTML нового комментария
-      const newComment = `
-        <li class="comment">
-          <div class="comment-header">
-            <div>${nameEl.value}</div>
-            <div>${formatDate()}</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              ${textEl.value}
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">0</span>
-              <button class="like-button"></button>
-            </div>
-          </div>
-        </li>
-      `;
+      // Обработчики кликов
+      nameEl.addEventListener('click', () => {
+        nameClicks++;
+        console.log(`Кликов по имени: ${nameClicks}`);
+      });
 
-      // Добавляем комментарий в список
-      commentsList.insertAdjacentHTML('beforeend', newComment);
+      textEl.addEventListener('click', () => {
+        textClicks++;
+        console.log(`Кликов по комментарию: ${textClicks}`);
+      });
 
-      // Очищаем поля ввода
-      nameEl.value = '';
-      textEl.value = '';
-    }); // Код писать здесь
+      buttonEl.addEventListener('click', () => {
+        buttonClicks++;
+        console.log(`Кликов по кнопке "Написать": ${buttonClicks}`);
+
+        if (nameEl.value.trim() === '' || textEl.value.trim() === '') {
+          alert('Пожалуйста, заполните все поля');
+          return;
+        }
+
+        const newComment = `
+          <li class="comment">
+            <div class="comment-header">
+              <div>${nameEl.value}</div>
+              <div>${formatDate()}</div>
+            </div>
+            <div class="comment-body">
+              <div class="comment-text">
+                ${textEl.value}
+              </div>
+            </div>
+            <div class="comment-footer">
+              <div class="likes">
+                <span class="likes-counter">0</span>
+                <button class="like-button"></button>
+              </div>
+            </div>
+          </li>
+        `;
+
+        commentsList.insertAdjacentHTML('beforeend', newComment);
+        nameEl.value = '';
+        textEl.value = '';
+      });
+
+      // Обработчик лайков (делегирование событий)
+      commentsList.addEventListener('click', (event) => {
+        if (event.target.classList.contains('like-button')) {
+          const likeButton = event.target;
+          const likesCounter = likeButton.previousElementSibling;
+          let likes = parseInt(likesCounter.textContent);
+
+          likeButton.classList.toggle('-active-like');
+          likes += likeButton.classList.contains('-active-like') ? 1 : -1;
+          likesCounter.textContent = likes;
+
+          console.log(`Лайков: ${likes}`);
+        }
+      }); // Код писать здесь
     console.log("It works!");
   </script>
 </html>
