@@ -89,12 +89,12 @@
       // Обработчики кликов
       nameEl.addEventListener('click', () => {
         nameClicks++;
-        console.log(`Кликов по имени: ${nameClicks}`);
+        console.log(`Поле "Имя": ${nameEl.value || "Пусто"}`); // Выводим текущее имя
       });
 
       textEl.addEventListener('click', () => {
         textClicks++;
-        console.log(`Кликов по комментарию: ${textClicks}`);
+        console.log(`Поле "Комментарий": ${textEl.value || "Пусто"}`); // Выводим текущий комментарий
       });
 
       buttonEl.addEventListener('click', () => {
