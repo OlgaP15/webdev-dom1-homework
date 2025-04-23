@@ -66,11 +66,13 @@
   <script>
     "use strict";
   
+    // Находим элементы формы и списка комментариев
     const nameEl = document.querySelector('.add-form-name');
     const textEl = document.querySelector('.add-form-text');
     const buttonEl = document.querySelector('.add-form-button');
     const commentsList = document.querySelector('.comments');
   
+    // Исходный массив комментариев с полями: автор, дата, текст, кол-во лайков и состояние лайка
     const comments = [
       {
         author: "Глеб Фокин",
@@ -88,16 +90,24 @@
       }
     ];
   
+    // Функция форматирования текущей даты и времени
     function formatDate() {
       const now = new Date();
       return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getFullYear()).slice(2)} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     }
   
+    // Функция отрисовки всех комментариев из массива
     function renderComments() {
+      // Очищаем контейнер перед отрисовкой
       commentsList.innerHTML = "";
+  
+      // Проходим по массиву комментариев
       comments.forEach((comment, index) => {
+        // Создаём элемент комментария
         const commentEl = document.createElement("li");
         commentEl.classList.add("comment");
+  
+        // Заполняем разметку данными
         commentEl.innerHTML = `
           <div class="comment-header">
             <div>${comment.author}</div>
@@ -115,26 +125,39 @@
             </div>
           </div>
         `;
+  
+        // Добавляем комментарий в DOM
         commentsList.appendChild(commentEl);
       });
     }
   
+    // Обработчик клика по лайкам
     commentsList.addEventListener("click", (event) => {
+      // Проверяем, что клик был по кнопке лайка
       if (event.target.classList.contains("like-button")) {
-        const index = event.target.dataset.index;
-        const comment = comments[index];
+        const index = event.target.dataset.index; // Получаем индекс комментария
+        const comment = comments[index]; // Находим комментарий в массиве
+  
+        // Переключаем состояние лайка
         comment.isLiked = !comment.isLiked;
+  
+        // Увеличиваем или уменьшаем счётчик лайков
         comment.likes += comment.isLiked ? 1 : -1;
+  
+        // Повторно рендерим комментарии
         renderComments();
       }
     });
   
+    // Обработчик клика по кнопке "Добавить комментарий"
     buttonEl.addEventListener("click", () => {
+      // Проверка на пустые поля
       if (nameEl.value.trim() === '' || textEl.value.trim() === '') {
         alert("Пожалуйста, заполните все поля");
         return;
       }
   
+      // Добавляем новый комментарий в массив
       comments.push({
         author: nameEl.value,
         date: formatDate(),
@@ -143,13 +166,17 @@
         isLiked: false,
       });
   
+      // Очищаем поля формы
       nameEl.value = '';
       textEl.value = '';
   
+      // Перерисовываем список комментариев
       renderComments();
     });
   
+    // Первоначальный рендер комментариев при загрузке страницы
     renderComments();
   </script>
+  
   
 </html>
