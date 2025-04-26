@@ -137,3 +137,11 @@ body {
   .add-form-button:hover {
     opacity: 0.9;
   }
+  .reply-prefix {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 10px;
+    border-left: 3px solid #ddd;
+    padding-left: 10px;
+    display: none;
+  }
