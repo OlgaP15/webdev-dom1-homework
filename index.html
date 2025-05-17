@@ -65,12 +65,6 @@
     return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getFullYear()).slice(2)} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 
-  // Функция форматирования текущей даты и времени
-  function formatDate() {
-    const now = new Date();
-    return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getFullYear()).slice(2)} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  }
-  
   // Функция санитизации HTML (без экранирования >)
   function sanitizeHTML(str) {
     return str.replaceAll('&', '&amp;')
@@ -95,12 +89,12 @@
 
       commentEl.innerHTML = `
       <div class="comment-header">
-        <div>${sanitizeHTML(comment.author)}</div>
+        <div>${comment.author}</div>
         <div>${comment.date}</div>
       </div>
       <div class="comment-body">
         <div class="comment-text">
-          ${formatCommentText(comment.text)}
+          ${comment.text}
         </div>
       </div>
       <div class="comment-footer">
@@ -168,8 +162,8 @@
       const response = await fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({
-          text: text,
-          name: name,
+          text: formatCommentText(text),
+          name: sanitizeHTML(name),
         }),
       });
       
@@ -194,13 +188,12 @@
   
   // Инициализация приложения
   async function init() {
+    // Загружаем комментарии из API
+    await fetchComments();
     // Вешаем обработчики событий
     commentsList.addEventListener("click", handleCommentsClick);
     buttonEl.addEventListener("click", addNewComment);
-    // Загружаем комментарии из API
-    await fetchComments();
   }
-  
   // Запускаем приложение
   init();
 </script>
