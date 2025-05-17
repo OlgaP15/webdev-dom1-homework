@@ -1,52 +1,21 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Проект "Комменты"</title>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="container">
     <ul class="comments">
-      <li class="comment">
-        <div class="comment-header">
-          <div>Глеб Фокин</div>
-          <div>12.02.22 12:18</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Это будет первый комментарий на этой странице
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">3</span>
-            <button class="like-button"></button>
-          </div>
-        </div>
-      </li>
-      <li class="comment">
-        <div class="comment-header">
-          <div>Варвара Н.</div>
-          <div>13.02.22 19:22</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Мне нравится как оформлена эта страница! ❤
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">75</span>
-            <button class="like-button -active-like"></button>
-          </div>
-        </div>
-      </li>
+      <!-- Комментарии будут загружаться из API -->
     </ul>
     <div class="add-form">
       <div id="reply-prefix" class="reply-prefix"></div>
-      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4"></textarea>
+      <input type="text" class="add-form-name" id="name-input" name="name" placeholder="Введите ваше имя" autocomplete="name" />
+      <textarea type="textarea" class="add-form-text" id="comment-text" name="comment" placeholder="Введите ваш коментарий" rows="4" autocomplete="off"></textarea>
       <div class="add-form-row">
         <button class="add-form-button">Написать</button>
       </div>
@@ -61,28 +30,47 @@
   const buttonEl = document.querySelector('.add-form-button');
   const commentsList = document.querySelector('.comments');
   const replyPrefix = document.getElementById('reply-prefix');
- // Исходный массив комментариев
-  let comments = [
-    {
-      author: "Глеб Фокин",
-      date: "12.02.22 12:18",
-      text: "Это будет первый комментарий на этой странице",
-      likes: 3,
-      isLiked: false,
-    },
-    {
-      author: "Варвара Н.",
-      date: "13.02.22 19:22",
-      text: "Мне нравится как оформлена эта страница! ❤",
-      likes: 75,
-      isLiked: true,
+  
+  // Замените на ваш персональный ключ (имя-фамилия)
+  const API_URL = "https://wedev-api.sky.pro/api/v1/olga-petrova/comments";
+  
+  // Исходный массив комментариев (будет заполняться из API)
+  let comments = [];
+  
+  // Функция загрузки комментариев из API
+  async function fetchComments() {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error("Ошибка при загрузке комментариев");
+      }
+      const data = await response.json();
+      comments = data.comments.map(comment => ({
+        author: comment.author.name,
+        date: formatApiDate(comment.date),
+        text: comment.text,
+        likes: comment.likes,
+        isLiked: comment.isLiked
+      }));
+      renderComments();
+    } catch (error) {
+      console.error("Ошибка:", error);
+      alert("Не удалось загрузить комментарии. Попробуйте позже.");
     }
-  ];
+  }
+  
+  // Функция преобразования даты из API в наш формат
+  function formatApiDate(apiDate) {
+    const date = new Date(apiDate);
+    return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getFullYear()).slice(2)} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  }
+
   // Функция форматирования текущей даты и времени
   function formatDate() {
     const now = new Date();
     return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getFullYear()).slice(2)} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   }
+  
   // Функция санитизации HTML (без экранирования >)
   function sanitizeHTML(str) {
     return str.replaceAll('&', '&amp;')
@@ -90,10 +78,12 @@
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#39;');
   }
+  
   // Функция форматирования текста комментария
   function formatCommentText(text) {
     return sanitizeHTML(text).replace(/\n/g, '<br>');
   }
+  
   // Функция отрисовки всех комментариев
   function renderComments() {
     commentsList.innerHTML = "";
@@ -124,6 +114,7 @@
       commentsList.appendChild(commentEl);
     });
   }
+  
   // Обработка кликов по комментариям
   function handleCommentsClick(event) {
     // Если клик по лайку - обрабатываем лайк
@@ -157,42 +148,59 @@
       console.log(`Подготовка ответа на комментарий #${index} от ${comment.author}`);
     }
   }
+  
   // Обработка добавления нового комментария
-  function addNewComment() {
-    const author = nameEl.value.trim();
+  async function addNewComment() {
+    const name = nameEl.value.trim();
     const text = textEl.value.trim();
 
-    if (author === '' || text === '') {
+    if (name === '' || text === '') {
       alert("Пожалуйста, заполните все поля");
       return;
     }
+    
+    if (name.length < 3 || text.length < 3) {
+      alert("Имя и текст должны содержать минимум 3 символа");
+      return;
+    }
 
-    const newComment = {
-      author: sanitizeHTML(author),
-      date: formatDate(),
-      text: sanitizeHTML(text),
-      likes: 0,
-      isLiked: false,
-    };
-
-    comments.push(newComment);
-
-    console.log("Добавлен новый комментарий:", newComment);
-    // Очищаем форму
-    nameEl.value = '';
-    textEl.value = '';
-    replyPrefix.style.display = 'none';
-
-    renderComments();
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          text: text,
+          name: name,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Ошибка при добавлении комментария");
+      }
+      
+      // После успешного добавления, загружаем обновленный список комментариев
+      await fetchComments();
+      
+      // Очищаем форму
+      nameEl.value = '';
+      textEl.value = '';
+      replyPrefix.style.display = 'none';
+      
+    } catch (error) {
+      console.error("Ошибка при добавлении комментария:", error);
+      alert(error.message);
+    }
   }
+  
   // Инициализация приложения
-  function init() {
+  async function init() {
     // Вешаем обработчики событий
     commentsList.addEventListener("click", handleCommentsClick);
     buttonEl.addEventListener("click", addNewComment);
-    // Первый рендер после загрузки
-    renderComments();
+    // Загружаем комментарии из API
+    await fetchComments();
   }
+  
   // Запускаем приложение
   init();
 </script>
