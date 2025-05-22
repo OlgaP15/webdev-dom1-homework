@@ -25,7 +25,6 @@
 </body>
 <script>
   "use strict";
-  // Находим элементы формы и списка комментариев
   const nameEl = document.querySelector('.add-form-name');
   const textEl = document.querySelector('.add-form-text');
   const buttonEl = document.querySelector('.add-form-button');
@@ -35,41 +34,35 @@
   const addForm = document.querySelector('.add-form');
   const addingLoader = document.getElementById('adding-loader');
   
-  // Замените на ваш персональный ключ (имя-фамилия)
   const API_URL = "https://wedev-api.sky.pro/api/v1/olga-petrova/comments";
   
-  // Исходный массив комментариев (будет заполняться из API)
   let comments = [];
   
-  // Функция загрузки комментариев из API
-  async function fetchComments() {
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) {
-        throw new Error("Ошибка при загрузке комментариев");
-      }
-      const data = await response.json();
-      comments = data.comments.map(comment => ({
-        author: comment.author.name,
-        date: formatApiDate(comment.date),
-        text: comment.text,
-        likes: comment.likes,
-        isLiked: comment.isLiked
-      }));
-      renderComments();
-    } catch (error) {
-      console.error("Ошибка:", error);
-      alert("Не удалось загрузить комментарии. Попробуйте позже.");
-    }
+  function fetchComments() {
+    return fetch(API_URL)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Ошибка при загрузке комментариев");
+        }
+        return response.json();
+      })
+      .then(data => {
+        comments = data.comments.map(comment => ({
+          author: comment.author.name,
+          date: formatApiDate(comment.date),
+          text: comment.text,
+          likes: comment.likes,
+          isLiked: comment.isLiked
+        }));
+        renderComments();
+      });
   }
   
-  // Функция преобразования даты из API в наш формат
   function formatApiDate(apiDate) {
     const date = new Date(apiDate);
     return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getFullYear()).slice(2)} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 
-  // Функция санитизации HTML (без экранирования >)
   function sanitizeHTML(str) {
     return str.replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
@@ -77,12 +70,10 @@
       .replaceAll("'", '&#39;');
   }
   
-  // Функция форматирования текста комментария
   function formatCommentText(text) {
     return sanitizeHTML(text).replace(/\n/g, '<br>');
   }
   
-  // Функция отрисовки всех комментариев
   function renderComments() {
     commentsList.innerHTML = "";
 
@@ -113,9 +104,7 @@
     });
   }
   
-  // Обработка кликов по комментариям
   function handleCommentsClick(event) {
-    // Если клик по лайку - обрабатываем лайк
     if (event.target.classList.contains("like-button")) {
       const index = event.target.dataset.index;
       const comment = comments[index];
@@ -129,17 +118,14 @@
       renderComments();
       return;
     }
-    // Если клик по самому комментарию (но не по лайку) - подставляем ответ
+
     const commentEl = event.target.closest('.comment');
     if (commentEl) {
       const index = commentEl.dataset.index;
       const comment = comments[index];
-      // Формируем текст ответа
       const replyText = `> ${comment.text}\n\n@${comment.author}, `;
-      // Устанавливаем в поле ввода
       textEl.value = replyText;
       textEl.focus();
-      // Показываем префикс ответа
       replyPrefix.textContent = `Ответ на комментарий ${comment.author}`;
       replyPrefix.style.display = 'block';
 
@@ -147,8 +133,7 @@
     }
   }
   
-  // Обработка добавления нового комментария
-  async function addNewComment() {
+  function addNewComment() {
     const name = nameEl.value.trim();
     const text = textEl.value.trim();
 
@@ -156,48 +141,59 @@
       alert("Пожалуйста, заполните все поля");
       return;
     }
-    
     if (name.length < 3 || text.length < 3) {
       alert("Имя и текст должны содержать минимум 3 символа");
       return;
     }
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          text: formatCommentText(text),
-          name: sanitizeHTML(name),
-        }),
-      });
-      
+    addForm.classList.add('disabled');
+    addingLoader.style.display = 'block';
+
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        text: formatCommentText(text),
+        name: sanitizeHTML(name),
+      }),
+    })
+    .then(response => {
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Ошибка при добавлении комментария");
+        return response.json().then(errorData => {
+          throw new Error(errorData.error || "Ошибка при добавлении комментария");
+        });
       }
-      
-      // После успешного добавления, загружаем обновленный список комментариев
-      await fetchComments();
-      
-      // Очищаем форму
+      return response.json();
+    })
+    .then(() => fetchComments())
+    .then(() => {
       nameEl.value = '';
       textEl.value = '';
       replyPrefix.style.display = 'none';
-      
-    } catch (error) {
-      console.error("Ошибка при добавлении комментария:", error);
+    })
+    .catch(error => {
       alert(error.message);
-    }
+    })
+    .finally(() => {
+      addForm.classList.remove('disabled');
+      addingLoader.style.display = 'none';
+    });
   }
-  
-  // Инициализация приложения
-  async function init() {
-    // Загружаем комментарии из API
-    await fetchComments();
-    // Вешаем обработчики событий
+
+  function init() {
+    commentsLoader.style.display = 'block';
+    commentsList.innerHTML = '';
+    fetchComments()
+      .catch(error => {
+        alert(error.message || "Не удалось загрузить комментарии. Попробуйте позже.");
+      })
+      .finally(() => {
+        commentsLoader.style.display = 'none';
+      });
+
     commentsList.addEventListener("click", handleCommentsClick);
     buttonEl.addEventListener("click", addNewComment);
   }
+
   init();
 </script>
 
