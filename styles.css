@@ -154,3 +154,22 @@ body {
   .adding-loader {
     text-align: center; margin: 20px; color: #888; 
   }
+  @keyframes rotating {
+    from { 
+      transform: rotate(0deg);
+    }
+    25% { 
+      transform: rotate(30deg);
+    }
+    75% { 
+      transform: rotate(-30deg);
+    }
+    to { 
+      transform: rotate(0deg);
+    }
+  }
+  .-loading-like {
+    animation: rotating 2s linear infinite;
+    pointer-events: none;
+    opacity: 0.6;
+  }
