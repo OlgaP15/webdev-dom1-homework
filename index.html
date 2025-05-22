@@ -9,8 +9,8 @@
 
 <body>
   <div class="container">
+    <div id="comments-loader" class="loader" style="display:none;">Загрузка комментариев...</div>
     <ul class="comments">
-      <!-- Комментарии будут загружаться из API -->
     </ul>
     <div class="add-form">
       <div id="reply-prefix" class="reply-prefix"></div>
@@ -20,6 +20,7 @@
         <button class="add-form-button">Написать</button>
       </div>
     </div>
+    <div id="adding-loader" class="adding-loader" style="display:none;">Комментарий добавляется...</div>
   </div>
 </body>
 <script>
@@ -30,6 +31,9 @@
   const buttonEl = document.querySelector('.add-form-button');
   const commentsList = document.querySelector('.comments');
   const replyPrefix = document.getElementById('reply-prefix');
+  const commentsLoader = document.getElementById('comments-loader');
+  const addForm = document.querySelector('.add-form');
+  const addingLoader = document.getElementById('adding-loader');
   
   // Замените на ваш персональный ключ (имя-фамилия)
   const API_URL = "https://wedev-api.sky.pro/api/v1/olga-petrova/comments";

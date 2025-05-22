@@ -145,3 +145,12 @@ body {
     padding-left: 10px;
     display: none;
   }
+  .loader {
+    text-align: center; margin: 20px; color: #888;
+  }
+  .add-form.disabled { 
+    display: none; 
+  }
+  .adding-loader {
+    text-align: center; margin: 20px; color: #888; 
+  }
