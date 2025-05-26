@@ -25,12 +25,8 @@
 </body>
 <script>
   "use strict";
-  function delay(interval = 300) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, interval);
-    });
+    function delay(interval = 300) {
+    return new Promise((resolve) => setTimeout(resolve, interval));
   }
 
   const nameEl = document.querySelector('.add-form-name');
@@ -49,6 +45,9 @@
   function fetchComments() {
     return fetch(API_URL)
       .then(response => {
+        if (response.status === 500) {
+          throw new Error("Сервер сломался, попробуй позже");
+        }
         if (!response.ok) {
           throw new Error("Ошибка при загрузке комментариев");
         }
