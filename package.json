@@ -1,0 +1,33 @@
+{
+  "name": "webdev-dom1-homework",
+  "version": "1.0.0",
+  "description": "https://olgap15.github.io/webdev-dom1-homework/",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "lite-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OlgaP15/webdev-dom1-homework.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OlgaP15/webdev-dom1-homework/issues"
+  },
+  "homepage": "https://github.com/OlgaP15/webdev-dom1-homework#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "globals": "^16.2.0",
+    "lite-server": "^2.6.1",
+    "prettier": "^3.5.3"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0"
+  }
+}
