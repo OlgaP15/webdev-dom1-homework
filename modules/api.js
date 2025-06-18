@@ -1,6 +1,4 @@
 import { comments, formatApiDate, formatCommentText } from './comments.js'
-import { renderComments } from './renderComments.js'
-import { delay } from '../index.js'
 import { sanitizeHTML } from './sanitizeHtml.js'
 
 const API_URL = 'https://wedev-api.sky.pro/api/v2/olga-petrova/comments'
@@ -55,7 +53,6 @@ export function fetchComments() {
                     isLikeLoading: false,
                 })),
             )
-            renderComments()
         })
 }
 

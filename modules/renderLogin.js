@@ -1,5 +1,6 @@
 import { login, setToken, setName } from './api.js'
-import { init } from './initListeners.js'
+import { renderComments } from './renderComments.js'
+import { fetchComments } from './api.js'
 
 export const renderLogin = () => {
     const loginSection = document.getElementById('login-section')
@@ -8,16 +9,18 @@ export const renderLogin = () => {
     loginSection.innerHTML = `
         <section class="add-form">
             <h1>Форма входа</h1>
-            <input type="text" 
-                   class="add-form-name" 
-                   placeholder="Логин" 
-                   id="login-input"
-                   required>
-            <input type="password" 
-                   class="add-form-name" 
-                   placeholder="Пароль" 
-                   id="password-input"
-                   required>
+            <form>
+                <input type="text" 
+                       class="add-form-name" 
+                       placeholder="Логин" 
+                       id="login-input"
+                       required>
+                <input type="password" 
+                       class="add-form-name" 
+                       placeholder="Пароль" 
+                       id="password-input"
+                       required>
+            </form>
             <fieldset class="add-form-registry">
                 <button class="add-form-button-main" type="button" id="login-button">Войти</button>
                 <span class="add-form-button-link" id="register-link">
@@ -54,7 +57,18 @@ export const renderLogin = () => {
                 .then((responseData) => {
                     setToken(responseData.user.token)
                     setName(responseData.user.name)
-                    init()
+                    return fetchComments()
+                })
+                .then(() => {
+                    const container = document.querySelector('.container')
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="comments" id="comments"></div>
+                            <div id="login-section"></div>
+                            <div id="comments-loader" class="comments-loader" style="display:none;"></div>
+                        `
+                        renderComments()
+                    }
                 })
                 .catch((error) => {
                     alert(error.message || 'Ошибка при входе')

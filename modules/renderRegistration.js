@@ -1,36 +1,36 @@
 import { registration, setToken, setName } from './api.js'
-import { init } from './initListeners.js'
+import { renderComments } from './renderComments.js'
 
 export const renderRegistration = () => {
     const loginSection = document.getElementById('login-section')
     if (!loginSection) return
 
     loginSection.innerHTML = `
-        <section class="add-form">
-            <h1>Регистрация</h1>
-            <input type="text" 
-                   class="add-form-name" 
-                   placeholder="Имя" 
-                   id="name-input"
-                   required>
-            <input type="text" 
-                   class="add-form-name" 
-                   placeholder="Логин" 
-                   id="login-input"
-                   required>
-            <input type="password" 
-                   class="add-form-name" 
-                   placeholder="Пароль" 
-                   id="password-input"
-                   required>
-            <fieldset class="add-form-registry">
-                <button class="add-form-button-main" type="button" id="register-button">Зарегистрироваться</button>
-                <span class="add-form-button-link" id="login-link">
-                    Войти
-                </span>
-            </fieldset>
-        </section>
-    `
+    <section class="add-form">
+      <h1>Регистрация</h1>
+      <input type="text" 
+             class="add-form-name" 
+             placeholder="Имя" 
+             id="name-input"
+             required>
+      <input type="text" 
+             class="add-form-name" 
+             placeholder="Логин" 
+             id="login-input"
+             required>
+      <input type="password" 
+             class="add-form-name" 
+             placeholder="Пароль" 
+             id="password-input"
+             required>
+      <fieldset class="add-form-registry">
+        <button class="add-form-button-main" type="button" id="register-button">Зарегистрироваться</button>
+        <span class="add-form-button-link" id="login-link">
+          Войти
+        </span>
+      </fieldset>
+    </section>
+  `
 
     document.getElementById('login-link')?.addEventListener('click', () => {
         import('./renderLogin.js').then((module) => {
@@ -70,7 +70,7 @@ export const renderRegistration = () => {
                 .then((responseData) => {
                     setToken(responseData.user.token)
                     setName(responseData.user.name)
-                    init()
+                    renderComments() // Изменили init() на renderComments()
                 })
                 .catch((error) => {
                     console.error('Registration error:', error)

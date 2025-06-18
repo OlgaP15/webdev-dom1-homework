@@ -1,41 +1,77 @@
-import { postCommentWithRetry, fetchComments } from './api.js'
+import { postCommentWithRetry, token, fetchComments } from './api.js'
 import { comments } from './comments.js'
 import { renderComments } from './renderComments.js'
-import {
-    getNameEl,
-    getTextEl,
-    getButtonEl,
-    getCommentsList,
-    getReplyPrefix,
-    getCommentsLoader,
-    getAddForm,
-    getAddingLoader,
-    delay,
-} from '../index.js'
 
-let eventListenersInitialized = false
+const getTextEl = () => document.querySelector('.add-form-text')
+const getButtonEl = () => document.querySelector('.add-form-button')
+const getCommentsList = () => document.querySelector('.comments')
+const getReplyPrefix = () => document.getElementById('reply-prefix')
+const getAddForm = () => document.querySelector('.add-form')
+const getAddingLoader = () => document.getElementById('adding-loader')
 
-const handleCommentsClick = (event) => {
-    if (event.target.classList.contains('like-button')) {
-        const index = event.target.dataset.index
-        const comment = comments[index]
-
-        if (comment.isLikeLoading) return
-
-        comment.isLikeLoading = true
-        renderComments()
-        у
-        delay(2000).then(() => {
-            comment.likes = comment.isLiked
-                ? comment.likes - 1
-                : comment.likes + 1
-            comment.isLiked = !comment.isLiked
-            comment.isLikeLoading = false
-            renderComments()
+export const initCommentHandlers = () => {
+    const buttonEl = getButtonEl()
+    if (buttonEl) {
+        buttonEl.addEventListener('click', (event) => {
+            addNewComment()
         })
+    }
+}
+
+export const initQuoteHandlers = () => {
+    const commentsList = getCommentsList()
+    if (commentsList) {
+        commentsList.addEventListener('click', handleQuoteClick)
+    }
+}
+
+export const initLikeHandlers = () => {
+    const commentsList = getCommentsList()
+    if (commentsList) {
+        commentsList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('like-button')) {
+                event.preventDefault()
+                handleLikeClick(event)
+            }
+        })
+    }
+}
+
+const addNewComment = () => {
+    const textEl = getTextEl()
+    const replyPrefix = getReplyPrefix()
+    const addForm = getAddForm()
+    const addingLoader = getAddingLoader()
+
+    const text = textEl?.value.trim()
+
+    if (!text) {
+        alert('Пожалуйста, введите комментарий')
         return
     }
 
+    addForm?.classList.add('disabled')
+    if (addingLoader) addingLoader.style.display = 'block'
+
+    postCommentWithRetry({ name, text })
+        .then(() => {
+            return fetchComments()
+        })
+        .then(() => {
+            if (textEl) textEl.value = ''
+            if (replyPrefix) replyPrefix.style.display = 'none'
+            renderComments()
+        })
+        .catch((error) => {
+            alert(error.message || 'Ошибка при отправке')
+        })
+        .finally(() => {
+            addForm?.classList.remove('disabled')
+            if (addingLoader) addingLoader.style.display = 'none'
+        })
+}
+
+const handleQuoteClick = (event) => {
     if (event.target.closest('.comment')) {
         const commentEl = event.target.closest('.comment')
         const index = commentEl.dataset.index
@@ -56,79 +92,28 @@ const handleCommentsClick = (event) => {
     }
 }
 
-const addNewComment = () => {
-    const nameEl = getNameEl()
-    const textEl = getTextEl()
+const handleLikeClick = (event) => {
+    if (event.target.classList.contains('like-button')) {
+        if (!token) {
+            alert('Пожалуйста, авторизуйтесь, чтобы поставить лайк')
+            return
+        }
 
-    if (!nameEl || !textEl) return
+        const index = event.target.dataset.index
+        const comment = comments[index]
 
-    const name = nameEl.value.trim()
-    const text = textEl.value.trim()
-    const addForm = getAddForm()
-    const addingLoader = getAddingLoader()
-    const replyPrefix = getReplyPrefix()
+        if (comment.isLikeLoading) return
 
-    if (!text) {
-        alert('Пожалуйста, введите комментарий')
-        return
+        comment.isLikeLoading = true
+        renderComments()
+
+        setTimeout(() => {
+            comment.likes = comment.isLiked
+                ? comment.likes - 1
+                : comment.likes + 1
+            comment.isLiked = !comment.isLiked
+            comment.isLikeLoading = false
+            renderComments()
+        }, 2000)
     }
-
-    addForm?.classList.add('disabled')
-    if (addingLoader) addingLoader.style.display = 'block'
-
-    postCommentWithRetry({ name, text })
-        .then(() => fetchComments())
-        .then(() => {
-            if (textEl) textEl.value = ''
-            if (replyPrefix) replyPrefix.style.display = 'none'
-        })
-        .catch((error) => {
-            console.error('Ошибка:', error)
-            alert(error.message || 'Произошла ошибка при отправке')
-        })
-        .finally(() => {
-            addForm?.classList.remove('disabled')
-            if (addingLoader) addingLoader.style.display = 'none'
-        })
-}
-
-const initEventListeners = () => {
-    if (eventListenersInitialized) return
-
-    const commentsList = getCommentsList()
-    const buttonEl = getButtonEl()
-
-    if (commentsList) {
-        commentsList.addEventListener('click', handleCommentsClick)
-    }
-
-    if (buttonEl) {
-        buttonEl.addEventListener('click', addNewComment)
-    }
-
-    eventListenersInitialized = true
-}
-
-export const initListeners = () => {
-    initEventListeners()
-}
-
-export const init = () => {
-    const commentsLoader = getCommentsLoader()
-    const commentsList = getCommentsList()
-
-    if (!commentsList) return
-
-    commentsLoader.style.display = 'block'
-    commentsList.innerHTML = ''
-
-    fetchComments()
-        .catch((error) => {
-            console.error('Ошибка загрузки:', error)
-            alert(error.message || 'Не удалось загрузить комментарии')
-        })
-        .finally(() => {
-            commentsLoader.style.display = 'none'
-            initEventListeners()
-        })
 }
