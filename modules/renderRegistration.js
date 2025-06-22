@@ -70,7 +70,7 @@ export const renderRegistration = () => {
                 .then((responseData) => {
                     setToken(responseData.user.token)
                     setName(responseData.user.name)
-                    renderComments() // Изменили init() на renderComments()
+                    renderComments()
                 })
                 .catch((error) => {
                     console.error('Registration error:', error)

@@ -36,12 +36,10 @@ export const initQuoteHandlers = () => {
 }
 
 export const initLikeHandlers = () => {
-    // Вешаем обработчик только на кнопки лайка
     const likeButtons = document.querySelectorAll('.like-button')
     likeButtons.forEach((button) => {
         button.addEventListener('click', (event) => {
-            event.stopPropagation() // Остановить всплытие, чтобы не сработал цитатник
-            handleLikeClick(event)
+            event.stopPropagation()
         })
     })
 }
