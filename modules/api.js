@@ -1,4 +1,4 @@
-import { comments, formatApiDate, formatCommentText } from './comments.js'
+import { formatCommentText } from './comments.js'
 import { sanitizeHTML } from './sanitizeHtml.js'
 
 const API_URL = 'https://wedev-api.sky.pro/api/v2/olga-petrova/comments'
@@ -40,20 +40,7 @@ export function fetchComments() {
             }
             return response.json()
         })
-        .then((data) => {
-            comments.splice(
-                0,
-                comments.length,
-                ...data.comments.map((comment) => ({
-                    author: comment.author.name,
-                    date: formatApiDate(comment.date),
-                    text: comment.text,
-                    likes: comment.likes,
-                    isLiked: comment.isLiked,
-                    isLikeLoading: false,
-                })),
-            )
-        })
+        .then((data) => data.comments)
 }
 
 export function postCommentWithRetry({

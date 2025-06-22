@@ -1,6 +1,5 @@
 import { comments } from './comments.js'
 import { token, name, logout } from './api.js'
-import { renderLogin } from './renderLogin.js'
 import {
     initCommentHandlers,
     initQuoteHandlers,

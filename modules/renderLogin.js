@@ -11,15 +11,15 @@ export const renderLogin = () => {
             <h1>Форма входа</h1>
             <form>
                 <input type="text" 
-                       class="add-form-name" 
-                       placeholder="Логин" 
-                       id="login-input"
-                       required>
+                    class="add-form-name" 
+                    placeholder="Логин" 
+                    id="login-input"
+                    required>
                 <input type="password" 
-                       class="add-form-name" 
-                       placeholder="Пароль" 
-                       id="password-input"
-                       required>
+                    class="add-form-name" 
+                    placeholder="Пароль" 
+                    id="password-input"
+                    required>
             </form>
             <fieldset class="add-form-registry">
                 <button class="add-form-button-main" type="button" id="login-button">Войти</button>

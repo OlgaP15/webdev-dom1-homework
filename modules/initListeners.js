@@ -1,5 +1,5 @@
 import { postCommentWithRetry, token, fetchComments } from './api.js'
-import { comments } from './comments.js'
+import { comments, updateComments, formatApiDate } from './comments.js'
 import { renderComments } from './renderComments.js'
 
 const getTextEl = () => document.querySelector('.add-form-text')
@@ -8,6 +8,16 @@ const getCommentsList = () => document.querySelector('.comments')
 const getReplyPrefix = () => document.getElementById('reply-prefix')
 const getAddForm = () => document.querySelector('.add-form')
 const getAddingLoader = () => document.getElementById('adding-loader')
+
+const mapApiComments = (apiComments) =>
+    apiComments.map((comment) => ({
+        author: comment.author.name,
+        date: formatApiDate(comment.date),
+        text: comment.text,
+        likes: comment.likes,
+        isLiked: comment.isLiked,
+        isLikeLoading: false,
+    }))
 
 export const initCommentHandlers = () => {
     const buttonEl = getButtonEl()
@@ -26,15 +36,14 @@ export const initQuoteHandlers = () => {
 }
 
 export const initLikeHandlers = () => {
-    const commentsList = getCommentsList()
-    if (commentsList) {
-        commentsList.addEventListener('click', (event) => {
-            if (event.target.classList.contains('like-button')) {
-                event.preventDefault()
-                handleLikeClick(event)
-            }
+    // Вешаем обработчик только на кнопки лайка
+    const likeButtons = document.querySelectorAll('.like-button')
+    likeButtons.forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation() // Остановить всплытие, чтобы не сработал цитатник
+            handleLikeClick(event)
         })
-    }
+    })
 }
 
 const addNewComment = () => {
@@ -54,10 +63,9 @@ const addNewComment = () => {
     if (addingLoader) addingLoader.style.display = 'block'
 
     postCommentWithRetry({ name, text })
-        .then(() => {
-            return fetchComments()
-        })
-        .then(() => {
+        .then(() => fetchComments())
+        .then((apiComments) => {
+            updateComments(mapApiComments(apiComments))
             if (textEl) textEl.value = ''
             if (replyPrefix) replyPrefix.style.display = 'none'
             renderComments()
