@@ -40,6 +40,7 @@ export const initLikeHandlers = () => {
     likeButtons.forEach((button) => {
         button.addEventListener('click', (event) => {
             event.stopPropagation()
+            handleLikeClick(event)
         })
     })
 }
